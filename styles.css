@@ -1,0 +1,392 @@
+/* import agrandir font from the folder (normal, grandlight, grandheavy) */
+:root {
+  --gradient: linear-gradient(90deg, rgb(55, 85, 255), rgb(255, 113, 222));
+  --gradienttransparent: linear-gradient(
+    90deg,
+    rgba(55, 85, 255, 0.5),
+    rgba(255, 113, 222, 0.5)
+  );
+  --darkoverlay: rgba(0, 0, 0, 0.5);
+  --bggradient: linear-gradient(#1d0044 50%, #4a00aa);
+}
+@font-face {
+  font-family: "Agrandir";
+  src: url("Agrandir - Free For Personal Use/Agrandir-Regular.otf")
+    format("opentype");
+  font-weight: 200;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Agrandir";
+  src: url("Agrandir - Free For Personal Use/Agrandir-TextBold.otf")
+    format("opentype");
+  font-weight: 300;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Agrandir";
+  src: url("Agrandir - Free For Personal Use/Agrandir-GrandHeavy.otf")
+    format("opentype");
+  font-weight: 700;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Agrandir";
+  src: url("Agrandir - Free For Personal Use/Agrandir-GrandLight.otf")
+    format("opentype");
+  font-weight: 400;
+  font-style: normal;
+}
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Agrandir", sans-serif;
+  color: white;
+  transition: all 0.5s ease;
+}
+body {
+  background: var(--bggradient);
+  height: 100%;
+  overflow-x: hidden;
+}
+
+nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 40px;
+  background: var(--darkoverlay);
+  backdrop-filter: blur(10px);
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  z-index: 100;
+  filter: drop-shadow(0px 5px 5px rgba(0, 0, 0, 0.5));
+}
+nav h1 {
+  background: var(--gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.hero h1:hover {
+  filter: drop-shadow(0px 5px 5px rgba(0, 0, 0, 0.5));
+  transform: translateY(-5px);
+  cursor: default;
+}
+h1 {
+  font-family: "Agrandir", sans-serif;
+  font-weight: 700;
+  font-size: 24px;
+}
+h3 {
+  font-family: "Agrandir", sans-serif;
+  font-weight: 400;
+  font-size: 18px;
+}
+
+nav a {
+  text-decoration: none;
+  color: white;
+  margin-left: 20px;
+  font-weight: 400;
+  display: inline-block;
+  position: relative;
+}
+nav a::after {
+  transition: width 0.5s ease;
+  content: "";
+  display: block;
+  width: 0;
+  height: 1px;
+  background-color: white;
+  position: absolute;
+  left: 0;
+  bottom: -4px;
+  border-radius: 4px;
+}
+nav a:hover::after {
+  width: 100%;
+}
+.hero h1 {
+  font-size: 100px;
+  background: var(--gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+h2 {
+  font-size: 50px;
+  margin-top: 30px;
+  background: var(--gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-align: center;
+}
+.hero {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 80vh;
+  padding: 20px;
+}
+.inputs {
+  display: flex;
+  gap: 20px;
+  width: 100%;
+  justify-content: center;
+  align-items: center;
+  height: 60px;
+}
+.inputs input {
+  border: white 0.5px solid;
+  padding: 5px;
+  border-radius: 50px;
+  font-family: "Agrandir", sans-serif;
+  font-weight: 400;
+  font-size: 18px;
+  width: fit-content;
+  height: 50px;
+  background: var(--darkoverlay);
+  backdrop-filter: blur(10px);
+  color: white;
+  text-align: center;
+  outline: none;
+}
+.inputs button {
+  border: none;
+  background: var(--gradient);
+  color: white;
+  padding: 10px 20px;
+  border-radius: 50px;
+  font-family: "Agrandir", sans-serif;
+  font-weight: 700;
+  font-size: 18px;
+  width: fit-content;
+}
+.hero p {
+  margin-top: 20px;
+  text-align: center;
+}
+
+.howitworks {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+}
+.card {
+  background: var(--darkoverlay);
+  backdrop-filter: blur(10px);
+  padding: 40px;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  margin: 20px;
+  border: white solid 1px;
+  font-family: "Agrandir";
+  font-weight: 200;
+}
+.card:hover {
+  background: var(--gradienttransparent);
+  color: white;
+
+  transform: translateY(-10px);
+  drop-shadow: 0px 0px 20px rgba(0, 0, 0, 0.5);
+  cursor: default;
+}
+.card:hover i {
+  /* add vertical down drop shadow */
+  filter: drop-shadow(0px 5px 5px rgba(0, 0, 0, 0.5));
+}
+.inputs button:hover {
+  filter: drop-shadow(0px 5px 5px rgba(0, 0, 0, 0.5));
+  transform: translateY(-5px);
+  cursor: pointer;
+}
+.card i {
+  background: var(--gradient);
+  padding: 20px;
+  border-radius: 50%;
+  position: absolute;
+  font-size: 15px;
+  color: white;
+  top: -30px;
+}
+
+.whychoose {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  margin-inline: 40px;
+}
+.whychoose ul {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+
+.whychoose li {
+  display: flex;
+  gap: 10px;
+}
+.whychoose li:hover {
+  color: var(--gradient);
+  transform: translateX(10px);
+  cursor: default;
+}
+.checkasource {
+  padding: 100px;
+}
+.checkasource h1 {
+  font-size: 50px;
+  background: var(--gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-align: center;
+  margin-block: 30px;
+}
+.twosections {
+  height: 100vh;
+  width: 100vw;
+
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: top;
+  justify-items: center;
+  padding-top: 100px;
+}
+
+.twosections::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 1px;
+  height: 100%;
+  background: white;
+  opacity: 1;
+}
+.previewcontent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 50vw;
+  padding: 10px;
+}
+
+.verdictrep {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+}
+
+.contentpreview {
+  background: var(--darkoverlay);
+  backdrop-filter: blur(10px);
+  padding: 20px;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  border: white solid 1px;
+  font-family: "Agrandir";
+  font-weight: 200;
+  margin: 10px;
+}
+.claimbox {
+  background: var(--darkoverlay);
+  backdrop-filter: blur(10px);
+  padding: 20px;
+  padding-left: 0;
+  border-radius: 10px;
+
+  border: white solid 1px;
+  font-family: "Agrandir";
+  font-weight: 200;
+  margin: 10px;
+}
+.VERDICT {
+  font-weight: 700;
+  background: none;
+  background-clip: border-box;
+  -webkit-background-clip: border-box;
+  -webkit-text-fill-color: currentcolor;
+
+  padding-left: 20px;
+}
+.CLAIM {
+  font-weight: 300;
+}
+.CLAIM-VERDICT {
+  position: absolute;
+  top: 0;
+  right: 0;
+  font-weight: 700;
+  padding: 20px;
+}
+.allanalysis {
+  scrollbar-width: thin;
+  scrollbar-color: white transparent;
+}
+
+.allanalysis::-webkit-scrollbar {
+  width: 10px;
+  background: transparent;
+}
+
+.allanalysis::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.allanalysis::-webkit-scrollbar-thumb {
+  background: var(--gradient);
+  border-radius: 999px;
+}
+
+.allanalysis::-webkit-scrollbar-thumb:hover {
+  opacity: 0.9;
+}
+
+.SOURCENAME {
+  font-weight: 300;
+}
+.SOURCELINK a {
+  font-weight: 200;
+  font-size: 14px;
+}
+.SOURCECREDIBILITY {
+  font-weight: 700;
+  background: none;
+  background-clip: border-box;
+  -webkit-background-clip: border-box;
+  -webkit-text-fill-color: currentcolor;
+  color: white;
+  background: var(--darkoverlay);
+  padding: 5px 10px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.SOURCE {
+  display: grid;
+  grid-template-columns: 9fr 1fr;
+  width: 100%;
+  padding-block: 10px;
+}
