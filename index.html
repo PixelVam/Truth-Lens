@@ -2,10 +2,11 @@
 <html lang="en">
 
 <head>
+    <script src="https://unpkg.com/htmx.org"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Home</title>
-    <link rel="stylesheet" href="styles.css">
+    <title>Document</title>
+    <link rel="stylesheet" href="/static/styles.css">
     <script src="https://kit.fontawesome.com/c2aeb8e94c.js" crossorigin="anonymous"></script>
 </head>
 
@@ -26,7 +27,10 @@
             <h1>seconds.</h1>
             <div class="inputs">
                 <input type="text" placeholder="Paste a headline/link...">
-                <a href="check.html" style="text-decoration: none; color: inherit;"><button>Check Now</button></a>
+                <button
+                    hx-target="body"
+                    hx-post="/render_statistics"
+                    hx-trigger="click">Check Now</button>
             </div>
             <p>Paste any headline, social media post, or WhatsApp forward. TruthLens uses real-time Google Search
                 grounding to verify the facts, so you don't have to guess what's true.</p>
@@ -67,7 +71,10 @@
         <div class="inputs">
             <!-- put a clipboard icon next to the placeholder -->
             <input type="text" placeholder="Paste a headline/link...">
-            <a href="check.html" style="text-decoration: none; color: inherit;"><button>Check Now</button></a>
+            <button
+                hx-target="body"
+                hx-post="/render_statistics"
+                hx-trigger="click">Check Now</button>
         </div>
     </main>
     <br><br><br><br>
