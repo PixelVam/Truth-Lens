@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Statistics - TruthLens</title>
+    <link rel="stylesheet" href="/static/styles.css">
+    <script src="https://kit.fontawesome.com/c2aeb8e94c.js" crossorigin="anonymous"></script>
+</head>
+
+<body>
+    <nav>
+        <div class="logo"><a href="/">
+                <h1>TruthLens</h1>
+            </a></div>
+        <div class="links">
+            <a href="/check">Check Now</a>
+            <a href="/analysis">Analyse</a>
+            <a href="/statistics">Statistics</a>
+        </div>
+    </nav>
+
+    <main style="margin-top: 150px; padding-inline: 100px;">
+        <h1 style="font-size: 50px; background: var(--gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-align: center; margin-bottom: 20px;">Statistics</h1>
+        <p style="text-align: center; font-weight: 200; font-size: 16px; color: rgba(255, 255, 255, 0.7); max-width: 600px; margin: 0 auto 40px auto;">
+            Track your fact-checking activity and overview the credibility patterns of verified information.
+        </p>
+
+        <div class="numericals">
+            <div class="card">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <h5 style="margin-top: 15px; font-weight: 400; font-size: 16px; color: rgba(255, 255, 255, 0.8);">Total Checks</h5>
+                <p class="totalchecks" style="font-size: 36px; font-weight: 700; background: var(--gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-top: 10px;">{{ total_checks }}</p>
+            </div>
+            <div class="card">
+                <i class="fa-regular fa-circle-check"></i>
+                <h5 style="margin-top: 15px; font-weight: 400; font-size: 16px; color: rgba(255, 255, 255, 0.8);">True Checks</h5>
+                <p class="truechecks" style="font-size: 36px; font-weight: 700; color: #4ade80; margin-top: 10px;">{{ true_checks }}</p>
+            </div>
+            <div class="card">
+                <i class="fa-regular fa-circle-xmark"></i>
+                <h5 style="margin-top: 15px; font-weight: 400; font-size: 16px; color: rgba(255, 255, 255, 0.8);">False Checks</h5>
+                <p class="falsechecks" style="font-size: 36px; font-weight: 700; color: #f87171; margin-top: 10px;">{{ false_checks }}</p>
+            </div>
+            <div class="card">
+                <i class="fa-solid fa-percent"></i>
+                <h5 style="margin-top: 15px; font-weight: 400; font-size: 16px; color: rgba(255, 255, 255, 0.8);">Accuracy Ratio</h5>
+                <p class="accuracyratio" style="font-size: 36px; font-weight: 700; background: var(--gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-top: 10px;">{{ accuracy_ratio_percent }}%</p>
+            </div>
+        </div>
+
+        <h4 style="text-align: center; font-size: 24px; font-weight: 400; margin-top: 50px; background: var(--gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 20px;">Verdict Distribution</h4>
+        <div class="verdictdistgraph" style="
+            width: 100%;
+            max-width: 650px;
+            margin: 20px auto 60px auto;
+            padding: 40px;
+            background: var(--darkoverlay);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            border: white solid 1px;
+            display: flex;
+            align-items: center;
+            justify-content: space-around;
+            gap: 40px;
+            flex-wrap: wrap;
+        ">
+            <div id="donutChart" style="
+                position: relative;
+                width: 200px;
+                height: 200px;
+                border-radius: 50%;
+                {% if total_checks > 0 %}
+                background: conic-gradient(
+                    #4ade80 0% {{ verdict_distribution.true_percent }}%,
+                    #fbbf24 {{ verdict_distribution.true_percent }}% {{ verdict_distribution.true_percent + verdict_distribution.misleading_percent }}%,
+                    #f87171 {{ verdict_distribution.true_percent + verdict_distribution.misleading_percent }}% 100%
+                );
+                {% else %}
+                background: conic-gradient(rgba(255, 255, 255, 0.15) 0% 100%);
+                {% endif %}
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+            ">
+                <div style="
+                    width: 140px;
+                    height: 140px;
+                    border-radius: 50%;
+                    background: #250259;
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    justify-content: center;
+                    box-shadow: inset 0 4px 10px rgba(0,0,0,0.5);
+                ">
+                    <span style="font-size: 12px; opacity: 0.6; font-weight: 200; letter-spacing: 1px;">TOTAL</span>
+                    <span id="donutTotal" style="font-size: 32px; font-weight: 700; color: white; margin-top: 2px;">{{ total_checks }}</span>
+                </div>
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 20px; flex: 1; min-width: 220px;">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <div style="width: 14px; height: 14px; border-radius: 4px; background: #4ade80; box-shadow: 0 0 8px rgba(74, 222, 128, 0.4);"></div>
+                    <div style="flex: 1; display: flex; justify-content: space-between; align-items: center;">
+                        <span style="font-size: 15px; font-weight: 300;">True / Likely True</span>
+                        <span id="truePercentLabel" style="font-size: 15px; font-weight: 700; color: #4ade80;">{{ true_checks }} ({{ verdict_distribution.true_percent }}%)</span>
+                    </div>
+                </div>
+
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <div style="width: 14px; height: 14px; border-radius: 4px; background: #fbbf24; box-shadow: 0 0 8px rgba(251, 191, 36, 0.4);"></div>
+                    <div style="flex: 1; display: flex; justify-content: space-between; align-items: center;">
+                        <span style="font-size: 15px; font-weight: 300;">Misleading</span>
+                        <span id="misleadingPercentLabel" style="font-size: 15px; font-weight: 700; color: #fbbf24;">{{ total_checks - true_checks - false_checks }} ({{ verdict_distribution.misleading_percent }}%)</span>
+                    </div>
+                </div>
+
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <div style="width: 14px; height: 14px; border-radius: 4px; background: #f87171; box-shadow: 0 0 8px rgba(248, 113, 113, 0.4);"></div>
+                    <div style="flex: 1; display: flex; justify-content: space-between; align-items: center;">
+                        <span style="font-size: 15px; font-weight: 300;">False / Likely False</span>
+                        <span id="falsePercentLabel" style="font-size: 15px; font-weight: 700; color: #f87171;">{{ false_checks }} ({{ verdict_distribution.false_percent }}%)</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            (function() {
+                try {
+                    const history = JSON.parse(localStorage.getItem("truthlens_history") || "[]");
+                    
+                    const total_checks = history.length;
+                    const true_checks = history.filter(item => item.verdict === "TRUE" || item.verdict === "LIKELY TRUE").length;
+                    const false_checks = history.filter(item => item.verdict === "FALSE" || item.verdict === "LIKELY FALSE").length;
+                    const misleading_checks = history.filter(item => item.verdict === "MISLEADING").length;
+
+                    const accuracy_ratio_percent = total_checks > 0 ? Math.round((true_checks / total_checks) * 100) : 0;
+                    const true_percent = total_checks > 0 ? Math.round((true_checks / total_checks) * 100) : 0;
+                    const false_percent = total_checks > 0 ? Math.round((false_checks / total_checks) * 100) : 0;
+                    const misleading_percent = total_checks > 0 ? Math.round((misleading_checks / total_checks) * 100) : 0;
+
+                    document.querySelector(".totalchecks").textContent = total_checks;
+                    document.querySelector(".truechecks").textContent = true_checks;
+                    document.querySelector(".falsechecks").textContent = false_checks;
+                    document.querySelector(".accuracyratio").textContent = accuracy_ratio_percent + "%";
+
+                    const donutChart = document.getElementById("donutChart");
+                    if (total_checks > 0) {
+                        donutChart.style.background = `conic-gradient(
+                            #4ade80 0% ${true_percent}%,
+                            #fbbf24 ${true_percent}% ${true_percent + misleading_percent}%,
+                            #f87171 ${true_percent + misleading_percent}% 100%
+                        )`;
+                    } else {
+                        donutChart.style.background = "conic-gradient(rgba(255, 255, 255, 0.15) 0% 100%)";
+                    }
+                    
+                    document.getElementById("donutTotal").textContent = total_checks;
+
+                    document.getElementById("truePercentLabel").textContent = `${true_checks} (${true_percent}%)`;
+                    document.getElementById("misleadingPercentLabel").textContent = `${misleading_checks} (${misleading_percent}%)`;
+                    document.getElementById("falsePercentLabel").textContent = `${false_checks} (${false_percent}%)`;
+                } catch (e) {
+                    console.error("Failed to calculate stats from localstorage:", e);
+                }
+            })();
+        </script>
+    </main>
+</body>
+
+</html>

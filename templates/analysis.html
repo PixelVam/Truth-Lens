@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <script src="https://unpkg.com/htmx.org"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analysis - TruthLens</title>
+    <link rel="stylesheet" href="/static/styles.css">
+    <script src="https://kit.fontawesome.com/c2aeb8e94c.js" crossorigin="anonymous"></script>
+</head>
+
+<body>
+    <nav>
+        <div class="logo"><a href="/">
+                <h1>TruthLens</h1>
+            </a></div>
+        <div class="links">
+            <a href="/check">Check Now</a>
+            <a href="/analysis">Analyse</a>
+            <a href="/statistics">Statistics</a>
+        </div>
+    </nav>
+    
+    <div id="analysisContent" style="{% if claim %}display: grid;{% else %}display: none;{% endif %}; padding-top: 120px;" class="twosections">
+        <div class="previewcontent">
+            <a href="#" id="backToHistoryBtn" style="display: none; align-items: center; gap: 8px; margin-bottom: 20px; color: #60a5fa; text-decoration: none; font-size: 14px; font-weight: 400; transition: color 0.2s ease;">
+                <i class="fa-solid fa-arrow-left"></i> Back to History
+            </a>
+            <h1
+                style="text-align: left; background: var(--gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+                Analysis</h1>
+            <div id="claimPreview" class="contentpreview" style="font-weight: 300; line-height: 1.6;">{{ claim }}</div>
+        </div>
+        <div class="allanalysis" style="padding:10px; max-height:90vh; overflow-y:auto; padding-bottom: 80px;">
+            <h4><i class="fa-regular fa-square-check"></i> Verdict</h4>
+            <div class="verdictrep">
+                <h2 id="verdictText" class="VERDICT" style="color: {% if verdict in ['TRUE', 'LIKELY TRUE'] %}#4ade80{% elif verdict == 'MISLEADING' %}#fbbf24{% else %}#f87171{% endif %}; font-size: 40px;">
+                    {{ verdict }}
+                </h2>
+                <div id="credibilityScore" class="VERDICTSCORE" style="font-weight: 700; font-size: 18px; color: white; background: var(--gradient); padding: 8px 16px; border-radius: 20px;">
+                    Credibility: {{ credibility_score }}%
+                </div>
+            </div>
+            
+            <p id="summaryText" style="font-family:'Agrandir'; font-weight:300; line-height: 1.6; margin-top: 15px;" class="SUMMARY">
+                {{ summary }}
+            </p>
+
+            <h4 style="margin-top: 30px;"><i class="fa-solid fa-chart-column"></i> Claim-by-claim Breakdown</h4>
+            <div id="claimsList" class="claims-list" style="margin-top: 15px;">
+                {% for item in claims %}
+                <div class="claimbreakdown" style="margin-bottom: 15px;">
+                    <div class="claimbox" style="border: {% if item.verdict in ['TRUE', 'LIKELY TRUE'] %}#4ade80{% elif item.verdict == 'MISLEADING' %}#fbbf24{% else %}#f87171{% endif %} solid 1px; padding: 20px; position: relative;">
+                        <p class="CLAIM" style="font-weight: 400; font-size: 16px; margin-bottom: 10px; padding-right: 120px;">{{ item.claim }}</p>
+                        <p class="EVIDENCE" style="font-size: 14px; font-weight: 200; opacity: 0.9; line-height: 1.5;">{{ item.explanation }}</p>
+                        <p class="CLAIM-VERDICT" style="
+                            color: {% if item.verdict in ['TRUE', 'LIKELY TRUE'] %}#4ade80{% elif item.verdict == 'MISLEADING' %}#fbbf24{% else %}#f87171{% endif %};
+                            position: absolute;
+                            top: 20px;
+                            right: 20px;
+                            font-weight: 700;
+                            font-size: 14px;
+                            border: 1px solid;
+                            padding: 2px 8px;
+                            border-radius: 4px;
+                            background: rgba(0, 0, 0, 0.3);
+                        ">
+                            {{ item.verdict }}
+                        </p>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <h4 style="margin-top: 30px;"><i class="fa-regular fa-newspaper"></i> Sources</h4>
+            <div id="sourcesList" class="sources" style="margin-top: 15px; background: var(--darkoverlay); border-radius: 10px; border: white solid 1px; padding: 20px;">
+                {% if sources %}
+                    {% for source in sources %}
+                    <div class="SOURCE" style="border-bottom: 1px solid rgba(255, 255, 255, 0.1); padding-bottom: 12px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;">
+                        <div style="flex: 1; min-width: 0; padding-right: 20px;">
+                            <p class="SOURCENAME" style="font-weight: 400; font-size: 16px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ source.title }}</p>
+                            <p class="SOURCELINK" style="margin-top: 5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                                <a href="{{ source.url }}" target="_blank" style="color: #60a5fa; text-decoration: none; font-size: 14px; font-weight: 200;">{{ source.url }}</a>
+                            </p>
+                        </div>
+                        <p class="SOURCECREDIBILITY" style="
+                            border: {% if source.credibility == 'High' %}#4ade80{% elif source.credibility == 'Mid' %}#fbbf24{% else %}#f87171{% endif %} solid 1px;
+                            color: {% if source.credibility == 'High' %}#4ade80{% elif source.credibility == 'Mid' %}#fbbf24{% else %}#f87171{% endif %};
+                            background: rgba(0, 0, 0, 0.3);
+                            font-weight: 700;
+                            font-size: 12px;
+                            padding: 4px 10px;
+                            border-radius: 4px;
+                            text-align: center;
+                            min-width: 60px;
+                        ">
+                            {{ source.credibility }}
+                        </p>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <p style="font-weight: 200; font-size: 14px; opacity: 0.7;">No web search sources cited for this claim.</p>
+                {% endif %}
+            </div>
+
+            <h4 style="margin-top: 30px;"><i class="fa-solid fa-circle-info"></i> Context</h4>
+            <div class="contentpreview" style="padding: 20px; line-height: 1.6; font-weight: 200; margin-top: 15px;">
+                <p id="contextText" class="SUMMARY" style="margin: 0;">{{ context }}</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="historySelectState" style="display: none; padding: 120px 20px 40px 20px; max-width: 800px; margin: 0 auto; text-align: left; width: 100%;">
+        <h1 style="font-size: 36px; background: var(--gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 15px; font-family: 'Agrandir'; font-weight: 400;">
+            Verification History
+        </h1>
+        <p style="color: rgba(255,255,255,0.7); font-weight: 200; margin-bottom: 30px; font-size: 16px; margin-left: 0;">
+            Select a past fact-check to review its breakdown, verdict, and cited sources.
+        </p>
+        <div id="analysisHistoryList" style="display: flex; flex-direction: column; gap: 15px;">
+        </div>
+    </div>
+
+    <div id="emptyState" style="display: none; flex-direction: column; justify-content: center; align-items: center; height: 70vh; text-align: center; gap: 20px; width: 100%; padding-top: 120px;">
+        <i class="fa-solid fa-chart-line" style="font-size: 80px; background: var(--gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent;"></i>
+        <h2 style="font-size: 32px; background: var(--gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-top: 10px;">No Analysis Loaded</h2>
+        <p style="font-weight: 200; font-size: 16px; color: rgba(255, 255, 255, 0.7); max-width: 500px; line-height: 1.6;">
+            You haven't analyzed a source in this session yet. Paste a claim or upload a file on the check page to get started.
+        </p>
+        <a href="/check" style="
+            border: none;
+            background: var(--gradient);
+            color: white;
+            padding: 12px 30px;
+            border-radius: 50px;
+            font-family: 'Agrandir', sans-serif;
+            font-weight: 700;
+            font-size: 16px;
+            text-decoration: none;
+            margin-top: 10px;
+            display: inline-block;
+            transition: transform 0.2s ease;
+        " onmouseenter="this.style.transform='scale(1.05)'" onmouseleave="this.style.transform='scale(1)'">Check Now</a>
+    </div>
+
+    <script>
+        function getVerdictColor(verdict) {
+            if (verdict === "TRUE" || verdict === "LIKELY TRUE") return "#4ade80";
+            if (verdict === "MISLEADING") return "#fbbf24";
+            return "#f87171";
+        }
+
+        function renderAnalysisData(data) {
+            document.getElementById("claimPreview").textContent = data.claim;
+            
+            const verdictText = document.getElementById("verdictText");
+            verdictText.textContent = data.verdict;
+            verdictText.style.color = getVerdictColor(data.verdict);
+            
+            document.getElementById("credibilityScore").textContent = `Credibility: ${data.credibility_score}%`;
+            document.getElementById("summaryText").textContent = data.summary;
+            document.getElementById("contextText").textContent = data.context;
+            
+            // Claims
+            const claimsList = document.getElementById("claimsList");
+            claimsList.innerHTML = "";
+            (data.claims || []).forEach(item => {
+                const color = getVerdictColor(item.verdict);
+                const itemDiv = document.createElement("div");
+                itemDiv.className = "claimbreakdown";
+                itemDiv.style.marginBottom = "15px";
+                itemDiv.innerHTML = `
+                    <div class="claimbox" style="border: ${color} solid 1px; padding: 20px; position: relative;">
+                        <p class="CLAIM" style="font-weight: 400; font-size: 16px; margin-bottom: 10px; padding-right: 120px;">${item.claim}</p>
+                        <p class="EVIDENCE" style="font-size: 14px; font-weight: 200; opacity: 0.9; line-height: 1.5;">${item.explanation}</p>
+                        <p class="CLAIM-VERDICT" style="
+                            color: ${color};
+                            position: absolute;
+                            top: 20px;
+                            right: 20px;
+                            font-weight: 700;
+                            font-size: 14px;
+                            border: 1px solid;
+                            padding: 2px 8px;
+                            border-radius: 4px;
+                            background: rgba(0, 0, 0, 0.3);
+                        ">${item.verdict}</p>
+                    </div>
+                `;
+                claimsList.appendChild(itemDiv);
+            });
+            
+            // Sources
+            const sourcesList = document.getElementById("sourcesList");
+            sourcesList.innerHTML = "";
+            if (data.sources && data.sources.length > 0) {
+                data.sources.forEach(source => {
+                    const color = getVerdictColor(source.credibility === "High" ? "TRUE" : (source.credibility === "Mid" ? "MISLEADING" : "FALSE"));
+                    const sourceDiv = document.createElement("div");
+                    sourceDiv.className = "SOURCE";
+                    sourceDiv.style.cssText = "border-bottom: 1px solid rgba(255, 255, 255, 0.1); padding-bottom: 12px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;";
+                    
+                    sourceDiv.innerHTML = `
+                        <div style="flex: 1; min-width: 0; padding-right: 20px;">
+                            <p class="SOURCENAME" style="font-weight: 400; font-size: 16px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${source.title}</p>
+                            <p class="SOURCELINK" style="margin-top: 5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                                <a href="${source.url}" target="_blank" style="color: #60a5fa; text-decoration: none; font-size: 14px; font-weight: 200;">${source.url}</a>
+                            </p>
+                        </div>
+                        <p class="SOURCECREDIBILITY" style="
+                            border: ${color} solid 1px;
+                            color: ${color};
+                            background: rgba(0, 0, 0, 0.3);
+                            font-weight: 700;
+                            font-size: 12px;
+                            padding: 4px 10px;
+                            border-radius: 4px;
+                            text-align: center;
+                            min-width: 60px;
+                        ">${source.credibility}</p>
+                    `;
+                    sourcesList.appendChild(sourceDiv);
+                });
+            } else {
+                sourcesList.innerHTML = '<p style="font-weight: 200; font-size: 14px; opacity: 0.7;">No web search sources cited for this claim.</p>';
+            }
+            
+            document.getElementById("analysisContent").style.display = "grid";
+            document.getElementById("emptyState").style.display = "none";
+            document.getElementById("historySelectState").style.display = "none";
+        }
+
+        function showHistoryListOrEmpty(historyData) {
+            const emptyState = document.getElementById("emptyState");
+            const historySelectState = document.getElementById("historySelectState");
+            const analysisContent = document.getElementById("analysisContent");
+            
+            analysisContent.style.display = "none";
+            
+            if (historyData.length > 0) {
+                emptyState.style.display = "none";
+                historySelectState.style.display = "block";
+                
+                const listContainer = document.getElementById("analysisHistoryList");
+                listContainer.innerHTML = "";
+                
+                historyData.forEach((item) => {
+                    const date = new Date(item.timestamp).toLocaleDateString(undefined, {
+                        month: 'short',
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    });
+                    const verdictColor = getVerdictColor(item.verdict);
+                    
+                    const itemDiv = document.createElement("div");
+                    itemDiv.style.cssText = `
+                        background: var(--darkoverlay);
+                        border: white solid 1px;
+                        border-radius: 12px;
+                        padding: 20px;
+                        cursor: pointer;
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                        transition: transform 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
+                    `;
+                    
+                    itemDiv.addEventListener("mouseenter", () => {
+                        itemDiv.style.transform = "translateY(-2px)";
+                        itemDiv.style.background = "var(--gradienttransparent)";
+                        itemDiv.style.boxShadow = "0 8px 20px rgba(0,0,0,0.4)";
+                    });
+                    itemDiv.addEventListener("mouseleave", () => {
+                        itemDiv.style.transform = "translateY(0)";
+                        itemDiv.style.background = "var(--darkoverlay)";
+                        itemDiv.style.boxShadow = "none";
+                    });
+                    
+                    itemDiv.onclick = () => {
+                        localStorage.setItem("truthlens_active_analysis", JSON.stringify(item));
+                        renderAnalysisData(item);
+                        document.getElementById("backToHistoryBtn").style.display = "inline-flex";
+                    };
+                    
+                    itemDiv.innerHTML = `
+                        <div style="flex: 1; min-width: 0; padding-right: 20px;">
+                            <p style="font-weight: 400; font-size: 16px; margin: 0 0 8px 0; color: white; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${item.claim}</p>
+                            <span style="font-size: 13px; opacity: 0.6; font-weight: 200;">Verified on ${date}</span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 20px;">
+                            <span style="
+                                border: ${verdictColor} solid 1px;
+                                color: ${verdictColor};
+                                background: rgba(0,0,0,0.3);
+                                font-weight: 700;
+                                font-size: 13px;
+                                padding: 4px 12px;
+                                border-radius: 6px;
+                                letter-spacing: 0.5px;
+                            ">${item.verdict}</span>
+                            <i class="fa-solid fa-chevron-right" style="opacity: 0.6; font-size: 16px; color: white;"></i>
+                        </div>
+                    `;
+                    listContainer.appendChild(itemDiv);
+                });
+            } else {
+                emptyState.style.display = "flex";
+                historySelectState.style.display = "none";
+            }
+        }
+
+        (function() {
+            try {
+                {% if claim %}
+                const serverClaim = {{ claim | tojson }};
+                const analysisData = {
+                    claim: serverClaim,
+                    verdict: {{ verdict | tojson }},
+                    credibility_score: {{ credibility_score | tojson }},
+                    summary: {{ summary | tojson }},
+                    claims: {{ claims | tojson }},
+                    sources: {{ sources | tojson }},
+                    context: {{ context | tojson }},
+                    timestamp: new Date().toISOString()
+                };
+                
+                localStorage.setItem("truthlens_active_analysis", JSON.stringify(analysisData));
+                
+                let historyData = JSON.parse(localStorage.getItem("truthlens_history") || "[]");
+                const existingIndex = historyData.findIndex(item => item.claim === analysisData.claim);
+                if (existingIndex !== -1) {
+                    historyData.splice(existingIndex, 1);
+                }
+                
+                historyData.unshift(analysisData);
+                
+                if (historyData.length > 50) {
+                    historyData = historyData.slice(0, 50);
+                }
+                
+                localStorage.setItem("truthlens_history", JSON.stringify(historyData));
+                
+                renderAnalysisData(analysisData);
+                
+                if (historyData.length > 1) {
+                    document.getElementById("backToHistoryBtn").style.display = "inline-flex";
+                }
+                
+                {% else %}
+                
+                const urlParams = new URLSearchParams(window.location.search);
+                const loadParam = urlParams.get("load");
+                const historyData = JSON.parse(localStorage.getItem("truthlens_history") || "[]");
+                
+                if (loadParam === "true") {
+                    const activeAnalysis = localStorage.getItem("truthlens_active_analysis");
+                    if (activeAnalysis) {
+                        renderAnalysisData(JSON.parse(activeAnalysis));
+                        if (historyData.length > 1) {
+                            document.getElementById("backToHistoryBtn").style.display = "inline-flex";
+                        }
+                    } else {
+                        showHistoryListOrEmpty(historyData);
+                    }
+                } else {
+                    showHistoryListOrEmpty(historyData);
+                }
+                
+                {% endif %}
+            } catch (e) {
+                console.error("Local storage error:", e);
+            }
+        })();
+
+        const backBtn = document.getElementById("backToHistoryBtn");
+        backBtn.addEventListener("mouseenter", () => backBtn.style.color = "#93c5fd");
+        backBtn.addEventListener("mouseleave", () => backBtn.style.color = "#60a5fa");
+        backBtn.onclick = (e) => {
+            e.preventDefault();
+            const historyData = JSON.parse(localStorage.getItem("truthlens_history") || "[]");
+            showHistoryListOrEmpty(historyData);
+            if (window.location.search.includes("load=true")) {
+                window.history.pushState({}, '', '/analysis');
+            }
+        };
+    </script>
+</body>
+<style>
+    html,
+    body {
+        box-sizing: border-box;
+        max-width: 100%;
+        overflow-x: hidden;
+        margin: 0;
+        padding: 0;
+    }
+
+    *,
+    *::before,
+    *::after {
+        box-sizing: border-box;
+    }
+
+    h4 {
+        font-family: "Agrandir";
+        font-weight: 400;
+        color: white;
+        margin-top: 10px;
+    }
+
+    h4,
+    p {
+        margin-left: 20px;
+    }
+
+    .twosections,
+    .allanalysis,
+    .previewcontent,
+    .contentpreview,
+    .claimbreakdown,
+    .sources {
+        max-width: 100%;
+        overflow-wrap: break-word;
+        word-wrap: break-word;
+    }
+
+    .contentpreview:hover,
+    .claimbox:hover,
+    .context:hover {
+        transform: translateY(-5px);
+        transition: transform 0.3s ease;
+        filter: drop-shadow(0 10px 5px rgba(0, 0, 0, 0.5));
+    }
+
+    .SOURCE div:hover {
+        transform: translateX(10px);
+    }
+</style>
+
+</html>

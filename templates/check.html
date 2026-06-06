@@ -1,0 +1,263 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/htmx/1.9.12/htmx.min.js"></script>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Check Now - TruthLens</title>
+        <link rel="stylesheet" href="/static/styles.css" />
+        <script
+            src="https://kit.fontawesome.com/c2aeb8e94c.js"
+            crossorigin="anonymous"
+        ></script>
+    </head>
+
+    <body style="min-height: 120vh; overflow-y: auto;">
+        <nav>
+            <div class="logo">
+                <a href="/">
+                    <h1>TruthLens</h1>
+                </a>
+            </div>
+            <div class="links">
+                <a href="/check">Check Now</a>
+                <a href="/analysis">Analyse</a>
+                <a href="/statistics">Statistics</a>
+            </div>
+        </nav>
+
+        <div class="checkasource">
+            <h1>Check a Source</h1>
+            
+            {% if error %}
+            <div style="color: #f87171; text-align: center; margin-bottom: 20px; font-family: 'Agrandir'; font-weight: 300;">
+                <i class="fa-solid fa-triangle-exclamation"></i> {{ error }}
+            </div>
+            {% endif %}
+
+            <form id="analyseForm" hx-post="/render_analysis" hx-target="body" hx-encoding="multipart/form-data">
+                <input type="hidden" name="api_key" id="hiddenApiKey" value="{{ session.get('api_key', '') }}" />
+                <div class="inputs">
+                    <input type="text" name="claim" placeholder="Paste a headline/link..." style="width: 60%;" />
+                    <button type="submit">Analyse</button>
+                </div>
+                <h4 style="text-align: center; margin-block: 20px; font-family: 'Agrandir'; font-weight: 300;">or...</h4>
+                <div class="inputs">
+                    <input type="file" name="file" id="fileInput" style="display: none" />
+                    <button
+                        type="button"
+                        onclick="document.getElementById('fileInput').click()"
+                    >
+                        Upload a File
+                    </button>
+                </div>
+            </form>
+
+            <div
+                id="filePreview"
+                style="
+                    margin-top: 20px;
+                    padding: 10px;
+                    border: 1px solid #ccc;
+                    display: none;
+                    align-items: center;
+                    justify-content: space-between;
+                    border-radius: 5px;
+                    background: var(--darkoverlay);
+            ></div>
+
+            <div id="historySection" style="margin-top: 40px; text-align: left; display: none;">
+                <h3 style="font-family: 'Agrandir'; font-weight: 400; font-size: 20px; margin-bottom: 15px; color: white;">Recent Verifications</h3>
+                <div id="historyList" style="display: flex; flex-direction: column; gap: 12px; max-height: 250px; overflow-y: auto; padding-right: 5px;"></div>
+            </div>
+
+            <div class="infoandgemini">
+                <h2
+                    style="
+                        font-family: Agrandir;
+                        text-align: left;
+                        font-weight: 400;
+                        color: white;
+                        -webkit-background-clip: none;
+                    "
+                >
+                    Paste anything to fact-check
+                </h2>
+                <p style="text-align: left; margin-block: 10px">
+                    WhatsApp forwards, news headlines, viral claims — TruthLens
+                    checks them all against live web sources using Gemini AI.
+                </p>
+
+                <div class="inputs" style="justify-content: left">
+                    <input type="text" id="apiKeyInput" placeholder="Enter Gemini API key..." value="{{ session.get('api_key', '') }}" onchange="verifyApiKey()" style="width: 300px;" />
+                    <button type="button" onclick="verifyApiKey()">Verify</button>
+                </div>
+            </div>
+            <script>
+                const fileInput = document.getElementById("fileInput");
+                const filePreview = document.getElementById("filePreview");
+                const apiKeyInput = document.getElementById("apiKeyInput");
+                const hiddenApiKey = document.getElementById("hiddenApiKey");
+                const analyseForm = document.getElementById("analyseForm");
+
+                analyseForm.addEventListener("submit", (e) => {
+                    const submitBtn = analyseForm.querySelector("button[type='submit']");
+                    submitBtn.disabled = true;
+                    submitBtn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Analysing...';
+                });
+
+                apiKeyInput.addEventListener("input", (e) => {
+                    hiddenApiKey.value = e.target.value.trim();
+                });
+
+                fileInput.addEventListener("change", () => {
+                    const file = fileInput.files[0];
+                    if (!file) {
+                        filePreview.style.display = "none";
+                        filePreview.textContent = "";
+                        return;
+                    }
+
+                    filePreview.innerHTML = `<span>Uploaded: ${file.name}</span><button type="button" id="removeFileBtn" style="background: none; border: none; font-size: 18px; cursor: pointer;">❌</button>`;
+                    filePreview.style.display = "flex";
+
+                    document
+                        .getElementById("removeFileBtn")
+                        .addEventListener("click", () => {
+                            fileInput.value = "";
+                            filePreview.style.display = "none";
+                            filePreview.textContent = "";
+                        });
+                });
+
+                function verifyApiKey() {
+                    const key = apiKeyInput.value.trim();
+                    fetch("/save_api_key", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify({ api_key: key })
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.status === "success") {
+                            alert("API Key saved successfully!");
+                        } else {
+                            alert("Error: " + data.message);
+                        }
+                    })
+                    .catch(err => {
+                        alert("Error saving API Key.");
+                    });
+                }
+
+                function renderHistory() {
+                    const historySection = document.getElementById("historySection");
+                    const historyList = document.getElementById("historyList");
+                    
+                    try {
+                        const history = JSON.parse(localStorage.getItem("truthlens_history") || "[]");
+                        if (history.length === 0) {
+                            historySection.style.display = "none";
+                            return;
+                        }
+                        
+                        historySection.style.display = "block";
+                        historyList.innerHTML = "";
+                        
+                        history.forEach((item) => {
+                            const date = new Date(item.timestamp).toLocaleDateString(undefined, {
+                                month: 'short',
+                                day: 'numeric',
+                                hour: '2-digit',
+                                minute: '2-digit'
+                            });
+                            
+                            const verdictColor = getVerdictColor(item.verdict);
+                            
+                            const itemDiv = document.createElement("div");
+                            itemDiv.style.cssText = `
+                                background: var(--darkoverlay);
+                                border: white solid 1px;
+                                border-radius: 8px;
+                                padding: 15px;
+                                cursor: pointer;
+                                display: flex;
+                                justify-content: space-between;
+                                align-items: center;
+                                transition: transform 0.2s ease, background-color 0.2s ease;
+                                margin-bottom: 10px;
+                            `;
+                            
+                            itemDiv.addEventListener("mouseenter", () => {
+                                itemDiv.style.transform = "translateX(5px)";
+                                itemDiv.style.background = "var(--gradienttransparent)";
+                            });
+                            itemDiv.addEventListener("mouseleave", () => {
+                                itemDiv.style.transform = "translateX(0)";
+                                itemDiv.style.background = "var(--darkoverlay)";
+                            });
+                            
+                            itemDiv.onclick = () => loadHistoricalAnalysis(item);
+                            
+                            itemDiv.innerHTML = `
+                                <div style="flex: 1; min-width: 0; padding-right: 15px;">
+                                    <p style="font-weight: 400; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin: 0; color: white;">${item.claim}</p>
+                                    <span style="font-size: 12px; opacity: 0.6; font-weight: 200;">${date}</span>
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 15px;">
+                                    <span style="
+                                        border: ${verdictColor} solid 1px;
+                                        color: ${verdictColor};
+                                        background: rgba(0,0,0,0.3);
+                                        font-weight: 700;
+                                        font-size: 12px;
+                                        padding: 2px 8px;
+                                        border-radius: 4px;
+                                    ">${item.verdict}</span>
+                                    <i class="fa-solid fa-chevron-right" style="opacity: 0.6; font-size: 14px; color: white;"></i>
+                                </div>
+                            `;
+                            historyList.appendChild(itemDiv);
+                        });
+                    } catch (e) {
+                        console.error("Error rendering history:", e);
+                    }
+                }
+                
+                function getVerdictColor(verdict) {
+                    if (verdict === "TRUE" || verdict === "LIKELY TRUE") return "#4ade80";
+                    if (verdict === "MISLEADING") return "#fbbf24";
+                    return "#f87171";
+                }
+                
+                function loadHistoricalAnalysis(item) {
+                    try {
+                        localStorage.setItem("truthlens_active_analysis", JSON.stringify(item));
+                        window.location.href = "/analysis?load=true";
+                    } catch (e) {
+                        alert("Error loading verification details.");
+                    }
+                }
+                
+                window.addEventListener("DOMContentLoaded", renderHistory);
+            </script>
+        </div>
+    </body>
+    <style>
+        body {
+            overflow-y: auto;
+        }
+
+        .infoandgemini {
+            margin-top: 60px;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            text-align: left;
+            align-items: flex-start;
+            justify-content: left;
+        }
+    </style>
+</html>
